@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦞 Memory Dashboard / 记忆系统仪表盘</title>
+<style>
+
+:root {
+    --bg: #0a0a0f;
+    --surface: #1a1a2e;
+    --surface2: #16213e;
+    --accent: #FF4444;
+    --accent2: #FF6B6B;
+    --text: #e0e0e0;
+    --text2: #a0a0a0;
+    --green: #00C853;
+    --yellow: #FFB800;
+    --blue: #4FC3F7;
+    --purple: #7C4DFF;
+    --pink: #E040FB;
+    --border: #2a2a4a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    padding: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+h1, h2, h3, h4 { margin: 12px 0 8px; }
+h1 { font-size: 1.8em; color: var(--accent); }
+h2 { font-size: 1.4em; color: var(--accent2); border-bottom: 2px solid var(--border); padding-bottom: 6px; }
+h3 { font-size: 1.1em; color: var(--text); }
+.header {
+    text-align: center;
+    padding: 20px;
+    background: var(--surface);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+}
+.header h1 { margin: 0; }
+.header .subtitle { color: var(--text2); font-size: 0.9em; }
+.header .lobster { font-size: 2.5em; }
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.stat-card {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+.stat-card .stat-value { font-size: 2em; font-weight: bold; }
+.stat-card .stat-label { font-size: 0.8em; color: var(--text2); }
+.section {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+}
+.section-header {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+}
+.section-header .toggle-icon { font-size: 1.2em; transition: transform 0.3s; }
+.section.collapsed .section-body { display: none; }
+.section.collapsed .toggle-icon { transform: rotate(-90deg); }
+.section-body { margin-top: 12px; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85em;
+}
+th, td {
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+th { color: var(--accent); font-weight: 600; }
+tr:hover { background: var(--surface2); }
+.tag {
+    display: inline-block;
+    background: var(--surface2);
+    color: var(--text2);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    margin: 2px;
+}
+.priority-badge { font-weight: bold; }
+.status-active { color: var(--green); }
+.status-superseded { color: var(--yellow); }
+.status-conflict { color: var(--accent); }
+.status-unknown { color: var(--text2); }
+.timeline-item {
+    display: flex;
+    position: relative;
+    padding: 8px 0;
+    padding-left: 30px;
+}
+.timeline-marker {
+    position: absolute;
+    left: 8px;
+    top: 12px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+}
+.timeline-item:last-child::before { display: none; }
+.timeline-date { font-size: 0.8em; color: var(--text2); }
+.timeline-content h4 { margin: 2px 0; font-size: 0.95em; }
+.tags-row { margin: 4px 0; }
+.lesson-card, .project-card, .people-card {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid var(--border);
+}
+.lesson-priority { font-size: 1.2em; }
+.lesson-meta, .project-meta, .people-meta { font-size: 0.8em; color: var(--text2); margin-top: 6px; }
+.people-card { display: flex; align-items: center; gap: 12px; }
+.people-avatar { font-size: 2em; }
+.people-card h4 { margin: 0; }
+.tag-filter-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.tag-filter-btn {
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: all 0.2s;
+}
+.tag-filter-btn:hover, .tag-filter-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+.bar-row { display: flex; align-items: center; margin: 4px 0; }
+.bar-label { width: 100px; font-size: 0.85em; color: var(--text2); }
+.bar-fill {
+    height: 24px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    color: #fff;
+    padding: 2px 8px;
+    min-width: 30px;
+}
+.knowledge-graph {
+    width: 100%;
+    max-width: 900px;
+    height: auto;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+.api-table { font-size: 0.85em; }
+.api-table td:nth-child(3) { color: var(--green); }
+.api-table td:nth-child(4) { color: var(--accent); }
+.footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--text2);
+    font-size: 0.8em;
+}
+@media (max-width: 600px) {
+    body { padding: 8px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .header h1 { font-size: 1.4em; }
+    table { font-size: 0.75em; }
+    th, td { padding: 6px 4px; }
+    .knowledge-graph { max-width: 100%; }
+}
+
+</style>
+</head>
+<body>
+<div class="header"><div class="lobster">🦞</div><h1>Memory Dashboard 记忆系统仪表盘</h1><div class="subtitle">Clawd's Knowledge System | 生成时间: 2026-05-13 | 🦞 powered</div></div>
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-value" style="color:var(--blue)">29</div><div class="stat-label">总文件 Total Files</div></div>
+<div class="stat-card"><div class="stat-value" style="color:var(--green)">17</div><div class="stat-label">✅ Active 活跃</div></div>
+<div class="stat-card"><div class="stat-value" style="color:var(--yellow)">29</div><div class="stat-label">⚠️ Stale 过期</div></div>
+<div class="stat-card"><div class="stat-value" style="color:var(--accent)">0</div><div class="stat-label">🔴 Conflict 冲突</div></div>
+<div class="stat-card"><div class="stat-value" style="color:var(--text2)">0</div><div class="stat-label">⚪ Superseded 已替代</div></div>
+</div>
+<div class="section" id="cat-breakdown">
+<div class="section-header" onclick="toggleSection('cat-breakdown')"><h2>📊 分类统计 Category Breakdown</h2><span class="toggle-icon">▼</span></div>
+<div class="section-body"><div class="bar-row"><div class="bar-label">decision</div><div class="bar-fill" style="width:37.5%;background:#FF4444">3</div></div><div class="bar-row"><div class="bar-label">in-progress</div><div class="bar-fill" style="width:12.5%;background:#999">1</div></div><div class="bar-row"><div class="bar-label">lessons</div><div class="bar-fill" style="width:100.0%;background:#FFB800">8</div></div><div class="bar-row"><div class="bar-label">log</div><div class="bar-fill" style="width:100.0%;background:#4FC3F7">8</div></div><div class="bar-row"><div class="bar-label">people</div><div class="bar-fill" style="width:25.0%;background:#E040FB">2</div></div><div class="bar-row"><div class="bar-label">preferences</div><div class="bar-fill" style="width:25.0%;background:#FF9100">2</div></div><div class="bar-row"><div class="bar-label">projects</div><div class="bar-fill" style="width:25.0%;background:#00E676">2</div></div><div class="bar-row"><div class="bar-label">reflections</div><div class="bar-fill" style="width:37.5%;background:#7C4DFF">3</div></div></div>
+</div>
+<div class="section" id="health">
+<div class="section-header" onclick="toggleSection('health')"><h2>🏥 知识健康度 Knowledge Health</h2><span class="toggle-icon">▼</span></div>
+<div class="section-body">
+<p style="color:var(--text2);font-size:0.85em;margin-bottom:8px">🟢 &lt;30天 = Fresh | 🟡 30-60天 = Needs Update | 🔴 &gt;60天 = Stale</p>
+<table><thead><tr><th>文件 File</th><th>优先级 Priority</th><th>状态 Status</th><th>最后验证 Last Verified</th><th>天数 Days</th><th>新鲜度 Freshness</th><th>标签 Tags</th></tr></thead><tbody>
+<tr><td>无标题</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-12</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td></td></tr><tr><td>Memory System Setup Decision</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-09</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>memory, system-design, architecture</td></tr><tr><td>2026-05-11 综合分析预测汇总 - 待验证版本</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-11</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>predictions, macro, amc, trade, precious-metals, summit</td></tr><tr><td>Trump-Xi May 2026 Beijing Summit - 谈判内容分析与预测</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-11</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>trump, china, summit, trade, geopolitics, iran, tariff, rare-earth</td></tr><tr><td>API Reliability & Data Verification</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-11</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>api, data-verification, financial-data</td></tr><tr><td>Memory Management Operations (GC, Temperature, Conflicts)</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-10</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>memory, gc, temperature-model, conflict-resolution, multi-agent</td></tr><tr><td>Memory System Design & Operations Manual</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-10</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>memory, system-design, architecture, crud, gc, temperature-model</td></tr><tr><td>QMD Integration</td><td><span class="priority-badge">🟡 重要/Important</span></td><td><span class="status-active">active</span></td><td>2026-05-09</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>qmd, semantic-search, indexing</td></tr><tr><td>World Silver Survey 2026 - 白银供需数据分析</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-12</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>silver, commodities, analysis, supply-demand</td></tr><tr><td>四层交易分析体系 - Jordan Belfort Agent 核心框架</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-10</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>trading, system, strategy, technical-analysis</td></tr><tr><td>完整6维交易体系 - 终极结构化版</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-10</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>trading, system, 6-dimension, complete</td></tr><tr><td>Jordan Belfort - Quant Trading Agent Role</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-09</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>trading, quant, role, intraday</td></tr><tr><td>User Profile - Fan</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-09</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>user, profile, persona</td></tr><tr><td>Instructions That Must Be Remembered</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-10</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>instructions, rules, critical</td></tr><tr><td>用户 Fan 的沟通偏好</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-09</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>preferences, user-profile</td></tr><tr><td>Global Macro Alert Radar + Opportunity Scanner</td><td><span class="priority-badge">🔴 核心/Core</span></td><td><span class="status-active">active</span></td><td>2026-05-09</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>macro, trading, alert-system, api-integration</td></tr><tr><td>Semiconductor & AI Industry Analysis Framework</td><td><span class="priority-badge">🟡 重要/Important</span></td><td><span class="status-active">active</span></td><td>2026-05-09</td><td style="color:#FF4444">999 天</td><td>⚠️ 过期/Stale</td><td>analysis, semiconductor, ai, industry-research</td></tr>
+</tbody></table></div></div>
+<div class="section" id="decisions">
+<div class="section-header" onclick="toggleSection('decisions')"><h2>🎯 决策时间线 Decision Timeline</h2><span class="toggle-icon">▼</span></div>
+<div class="section-body"><div class="timeline-item decision-item"><div class="timeline-marker" style="background:#FF4444"></div><div class="timeline-content"><div class="timeline-date">2026-05-11</div><h4>2026-05-11 综合分析预测汇总 - 待验证版本</h4><div class="tags-row"><span class="tag">predictions</span> <span class="tag">macro</span> <span class="tag">amc</span> <span class="tag">trade</span> <span class="tag">precious-metals</span> <span class="tag">summit</span></div><span class="status-active">active</span></div></div><div class="timeline-item decision-item"><div class="timeline-marker" style="background:#FF4444"></div><div class="timeline-content"><div class="timeline-date">2026-05-11</div><h4>Trump-Xi May 2026 Beijing Summit - 谈判内容分析与预测</h4><div class="tags-row"><span class="tag">trump</span> <span class="tag">china</span> <span class="tag">summit</span> <span class="tag">trade</span> <span class="tag">geopolitics</span> <span class="tag">iran</span> <span class="tag">tariff</span> <span class="tag">rare-earth</span></div><span class="status-active">active</span></div></div><div class="timeline-item decision-item"><div class="timeline-marker" style="background:#FF4444"></div><div class="timeline-content"><div class="timeline-date">2026-05-09</div><h4>Memory System Setup Decision</h4><div class="tags-row"><span class="tag">memory</span> <span class="tag">system-design</span> <span class="tag">architecture</span></div><span class="status-active">active</span></div></div></div>
+</div>
+<div class="section" id="lessons">
+<div class="section-header" onclick="toggleSection('lessons')"><h2>📚 经验库 Lesson Explorer</h2><span class="toggle-icon">▼</span></div>
+<div class="section-body">
+<div class="tag-filter-bar">
+<button class="tag-filter-btn active" data-tag="all" onclick="filterLessons('all')">全部 All</button>
+<button class="tag-filter-btn" data-tag="6-dimension">6-dimension</button> <button class="tag-filter-btn" data-tag="SIVR">SIVR</button> <button class="tag-filter-btn" data-tag="ai">ai</button> <button class="tag-filter-btn" data-tag="alert-system">alert-system</button> <button class="tag-filter-btn" data-tag="amc">amc</button> <button class="tag-filter-btn" data-tag="analysis">analysis</button> <button class="tag-filter-btn" data-tag="api">api</button> <button class="tag-filter-btn" data-tag="api-integration">api-integration</button> <button class="tag-filter-btn" data-tag="architecture">architecture</button> <button class="tag-filter-btn" data-tag="china">china</button> <button class="tag-filter-btn" data-tag="commodities">commodities</button> <button class="tag-filter-btn" data-tag="complete">complete</button> <button class="tag-filter-btn" data-tag="conflict-resolution">conflict-resolution</button> <button class="tag-filter-btn" data-tag="critical">critical</button> <button class="tag-filter-btn" data-tag="crud">crud</button> <button class="tag-filter-btn" data-tag="data-verification">data-verification</button> <button class="tag-filter-btn" data-tag="fed">fed</button> <button class="tag-filter-btn" data-tag="financial-data">financial-data</button> <button class="tag-filter-btn" data-tag="gc">gc</button> <button class="tag-filter-btn" data-tag="geopolitics">geopolitics</button> <button class="tag-filter-btn" data-tag="indexing">indexing</button> <button class="tag-filter-btn" data-tag="industry-research">industry-research</button> <button class="tag-filter-btn" data-tag="instructions">instructions</button> <button class="tag-filter-btn" data-tag="intraday">intraday</button> <button class="tag-filter-btn" data-tag="iran">iran</button> <button class="tag-filter-btn" data-tag="macro">macro</button> <button class="tag-filter-btn" data-tag="memory">memory</button> <button class="tag-filter-btn" data-tag="multi-agent">multi-agent</button> <button class="tag-filter-btn" data-tag="persona">persona</button> <button class="tag-filter-btn" data-tag="precious-metals">precious-metals</button> <button class="tag-filter-btn" data-tag="predictions">predictions</button> <button class="tag-filter-btn" data-tag="preferences">preferences</button> <button class="tag-filter-btn" data-tag="profile">profile</button> <button class="tag-filter-btn" data-tag="qmd">qmd</button> <button class="tag-filter-btn" data-tag="quant">quant</button> <button class="tag-filter-btn" data-tag="rare-earth">rare-earth</button> <button class="tag-filter-btn" data-tag="role">role</button> <button class="tag-filter-btn" data-tag="rules">rules</button> <button class="tag-filter-btn" data-tag="semantic-search">semantic-search</button> <button class="tag-filter-btn" data-tag="semiconductor">semiconductor</button> <button class="tag-filter-btn" data-tag="silver">silver</button> <button class="tag-filter-btn" data-tag="strategy">strategy</button> <button class="tag-filter-btn" data-tag="summit">summit</button> <button class="tag-filter-btn" data-tag="supply-demand">supply-demand</button> <button class="tag-filter-btn" data-tag="system">system</button> <button class="tag-filter-btn" data-tag="system-design">system-design</button> <button class="tag-filter-btn" data-tag="tariff">tariff</button> <button class="tag-filter-btn" data-tag="technical-analysis">technical-analysis</button> <button class="tag-filter-btn" data-tag="temperature-model">temperature-model</button> <button class="tag-filter-btn" data-tag="trade">trade</button> <button class="tag-filter-btn" data-tag="trading">trading</button> <button class="tag-filter-btn" data-tag="trump">trump</button> <button class="tag-filter-btn" data-tag="user">user</button> <button class="tag-filter-btn" data-tag="user-profile">user-profile</button>
+</div>
+<div class="lesson-card" data-tags='[]'><div class="lesson-priority">🔴</div><h4>无标题</h4><div class="tags-row"></div><div class="lesson-meta">验证: 2026-05-12 | 状态: <span class="status-active">active</span></div></div><div class="lesson-card" data-tags='["api", "data-verification", "financial-data"]'><div class="lesson-priority">🔴</div><h4>API Reliability & Data Verification</h4><div class="tags-row"><span class="tag" data-tag="api">api</span> <span class="tag" data-tag="data-verification">data-verification</span> <span class="tag" data-tag="financial-data">financial-data</span></div><div class="lesson-meta">验证: 2026-05-11 | 状态: <span class="status-active">active</span></div></div><div class="lesson-card" data-tags='["memory", "gc", "temperature-model", "conflict-resolution", "multi-agent"]'><div class="lesson-priority">🔴</div><h4>Memory Management Operations (GC, Temperature, Conflicts)</h4><div class="tags-row"><span class="tag" data-tag="memory">memory</span> <span class="tag" data-tag="gc">gc</span> <span class="tag" data-tag="temperature-model">temperature-model</span> <span class="tag" data-tag="conflict-resolution">conflict-resolution</span> <span class="tag" data-tag="multi-agent">multi-agent</span></div><div class="lesson-meta">验证: 2026-05-10 | 状态: <span class="status-active">active</span></div></div><div class="lesson-card" data-tags='["memory", "system-design", "architecture", "crud", "gc", "temperature-model"]'><div class="lesson-priority">🔴</div><h4>Memory System Design & Operations Manual</h4><div class="tags-row"><span class="tag" data-tag="memory">memory</span> <span class="tag" data-tag="system-design">system-design</span> <span class="tag" data-tag="architecture">architecture</span> <span class="tag" data-tag="crud">crud</span> <span class="tag" data-tag="gc">gc</span> <span class="tag" data-tag="temperature-model">temperature-model</span></div><div class="lesson-meta">验证: 2026-05-10 | 状态: <span class="status-active">active</span></div></div><div class="lesson-card" data-tags='["qmd", "semantic-search", "indexing"]'><div class="lesson-priority">🟡</div><h4>QMD Integration</h4><div class="tags-row"><span class="tag" data-tag="qmd">qmd</span> <span class="tag" data-tag="semantic-search">semantic-search</span> <span class="tag" data-tag="indexing">indexing</span></div><div class="lesson-meta">验证: 2026-05-09 | 状态: <span class="status-active">active</span></div></div><div class="lesson-card" data-tags='["silver", "commodities", "analysis", "supply-demand"]'><div class="lesson-priority">🔴</div><h4>World Silver Survey 2026 - 白银供需数据分析</h4><div class="tags-row"><span class="tag" data-tag="silver">silver</span> <span class="tag" data-tag="commodities">commodities</span> <span class="tag" data-tag="analysis">analysis</span> <span class="tag" data-tag="supply-demand">supply-demand</span></div><div class="lesson-meta">验证: 2026-05-12 | 状态: <span class="status-active">active</span></div></div><div class="lesson-card" data-tags='["trading", "system", "strategy", "technical-analysis"]'><div class="lesson-priority">🔴</div><h4>四层交易分析体系 - Jordan Belfort Agent 核心框架</h4><div class="tags-row"><span class="tag" data-tag="trading">trading</span> <span class="tag" data-tag="system">system</span> <span class="tag" data-tag="strategy">strategy</span> <span class="tag" data-tag="technical-analysis">technical-analysis</span></div><div class="lesson-meta">验证: 2026-05-10 | 状态: <span class="status-active">active</span></div></div><div class="lesson-card" data-tags='["trading", "system", "6-dimension", "complete"]'><div class="lesson-priority">🔴</div><h4>完整6维交易体系 - 终极结构化版</h4><div class="tags-row"><span class="tag" data-tag="trading">trading</span> <span class="tag" data-tag="system">system</span> <span class="tag" data-tag="6-dimension">6-dimension</span> <span class="tag" data-tag="complete">complete</span></div><div class="lesson-meta">验证: 2026-05-10 | 状态: <span class="status-active">active</span></div></div>
+</div></div>
+<div class="section" id="events">
+<div class="section-header" onclick="toggleSection('events')"><h2>⏰ 事件时间线 Event Timeline</h2><span class="toggle-icon">▼</span></div>
+<div class="section-body"><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-13 03:28</div><h4>OpenClaw Backup Cron Script 执行中...</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-13 03:32</div><h4>等待备份完成</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-13 03:39</div><h4>✅ OpenClaw Backup Complete!</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-13 03:40</div><h4>Heartbeat Check Complete</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-13 13:06</div><h4>05:06 — Heartbeat at 05:06 Beijing</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-13 13:37</div><h4>05:36 — Heartbeat at 13:36 Beijing</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-12 09:22</div><h4>HBM 芯片产业链传导效应</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-12 09:30</div><h4>光模块「Scale Up」投资逻辑验证</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-12 10:48</div><h4>OpenClaw 系统备份执行</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-12 11:17</div><h4>AutoSkill 对比分析与记忆系统优化</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-12 11:35</div><h4>记忆系统优化总结</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-12 16:00</div><h4>🦞 Nightly Memory Health Check (Cron c53da03c)</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-11 09:36</div><h4>Heartbeat at 09:36 Beijing</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-11 10:37</div><h4>白银/SIVR 三重要素叠加分析完成</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-11 11:07</div><h4>特朗普访华谈判内容分析完成</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-11 11:23</div><h4>综合分析预测汇总已归档</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-11 11:34</div><h4>执行克隆心操作</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-11 13:42</div><h4>13:41 — Emoji Style Preference Recorded</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-11 23:45</div><h4>Nightly Reflection Completed</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-11 16:21</div><h4>16:17 — GitHub Pages Report System Deployed + Emoji Library + MU Real-time Analysis</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-11 16:37</div><h4>16:36 — Heartbeat Flow Correction Recorded</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-11 17:25</div><h4>17:11 — Complete API List Updated in Memory System</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-11 17:40</div><h4>09:38 — OpenClaw Backup Executed</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 10:07</div><h4>Learning Capture 系统部署完成</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 10:08</div><h4>Learning: User Correction</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 10:08</div><h4>Learning: New Instruction</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 10:08</div><h4>Learning: API Failure</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 10:08</div><h4>Learning: Trading Analysis</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 10:36</div><h4>Learning: User Correction</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 10:36</div><h4>Learning: New Instruction</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 10:36</div><h4>Learning: API Failure</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 10:36</div><h4>Learning: Trading Analysis</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 10:36</div><h4>Heartbeat at 02:36 UTC</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 10:50</div><h4>交易体系框架已整合</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 11:03</div><h4>完整6维交易体系已记录</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 11:36</div><h4>Learning: User Correction</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 11:36</div><h4>Learning: New Instruction</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 11:36</div><h4>Learning: API Failure</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 11:36</div><h4>Learning: Trading Analysis</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 11:36</div><h4>Heartbeat at 03:36 UTC</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 23:45</div><h4>Nightly Reflection Completed</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 16:28</div><h4>用户提交完整记忆系统规范 v1.0</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 22:22</div><h4>Tavily 新闻搜索已启用</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 22:26</div><h4>News API 确认可用并整合</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 22:37</div><h4>新增指令：必须标注使用的 API</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-10 23:08</div><h4>Heartbeat at 23:07 Beijing</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 08:30</div><h4>Memory System Setup Complete</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 09:06</div><h4>Heartbeat Check</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 09:11</div><h4>QMD Installation & Cron Setup</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 09:15</div><h4>Cron Jobs Configured</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 09:17</div><h4>Memory Clone Executed</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 09:20</div><h4>OpenClaw Full System Backup Triggered</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 09:24</div><h4>User Instruction Recorded</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 17:33</div><h4>系统克隆完成 (纠正后)</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 17:37</div><h4>Heartbeat check at 09:36 UTC</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 20:52</div><h4>QMD 索引启动完成</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 21:00</div><h4>Jordan Belfort 量化交易 Agent 角色配置</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 21:06</div><h4>Heartbeat at 13:06 UTC</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 22:53</div><h4>系统克隆完成</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 22:58</div><h4>Heartbeat at 14:56 UTC</h4></div></div><div class="timeline-item event-item"><div class="timeline-marker" style="background:#4FC3F7"></div><div class="timeline-content"><div class="timeline-date">2026-05-09 23:37</div><h4>Heartbeat at 15:36 UTC</h4></div></div></div>
+</div>
+<div class="section" id="people">
+<div class="section-header" onclick="toggleSection('people')"><h2>👤 人物档案 People Profiles</h2><span class="toggle-icon">▼</span></div>
+<div class="section-body"><div class="people-card"><div class="people-avatar">🦞</div><h4>Jordan Belfort - Quant Trading Agent Role</h4><div class="tags-row"><span class="tag">trading</span> <span class="tag">quant</span> <span class="tag">role</span> <span class="tag">intraday</span></div><div class="people-meta">验证: 2026-05-09 | <span class="status-active">active</span></div></div><div class="people-card"><div class="people-avatar">🦞</div><h4>User Profile - Fan</h4><div class="tags-row"><span class="tag">user</span> <span class="tag">profile</span> <span class="tag">persona</span></div><div class="people-meta">验证: 2026-05-09 | <span class="status-active">active</span></div></div></div>
+</div>
+<div class="section" id="projects">
+<div class="section-header" onclick="toggleSection('projects')"><h2>🛠️ 项目追踪 Project Tracker</h2><span class="toggle-icon">▼</span></div>
+<div class="section-body"><div class="project-card"><h4>Global Macro Alert Radar + Opportunity Scanner</h4><div class="tags-row"><span class="tag">macro</span> <span class="tag">trading</span> <span class="tag">alert-system</span> <span class="tag">api-integration</span></div><div class="project-meta"><span>验证: 2026-05-09</span><span style="color:#FF4444">999天前更新</span><span class="status-active">active</span></div></div><div class="project-card"><h4>Semiconductor & AI Industry Analysis Framework</h4><div class="tags-row"><span class="tag">analysis</span> <span class="tag">semiconductor</span> <span class="tag">ai</span> <span class="tag">industry-research</span></div><div class="project-meta"><span>验证: 2026-05-09</span><span style="color:#FF4444">999天前更新</span><span class="status-active">active</span></div></div></div>
+</div>
+<div class="section" id="graph">
+<div class="section-header" onclick="toggleSection('graph')"><h2>🔗 知识图谱 Knowledge Graph</h2><span class="toggle-icon">▼</span></div>
+<div class="section-body">
+<p style="color:var(--text2);font-size:0.85em;margin-bottom:8px">基于 [[wiki-link]] 引用关系的文件关联图 | 29 nodes, 18 edges</p>
+<svg viewBox="0 0 900 500" class="knowledge-graph" xmlns="http://www.w3.org/2000/svg">
+<line x1="89" y1="169" x2="473" y2="253" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="369" y2="249" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="621" y2="241" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="93" y2="433" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="213" y2="163" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="95" y2="335" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="234" y2="334" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="214" y2="254" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="757" y2="257" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="625" y2="155" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="746" y2="166" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="100" y2="240" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="476" y2="346" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="367" y2="337" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="616" y2="346" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="751" y2="341" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="226" y2="436" stroke="#666" stroke-width="1" opacity="0.4"/>
+<line x1="89" y1="169" x2="93" y2="433" stroke="#666" stroke-width="1" opacity="0.4"/>
+<circle cx="107" cy="67" r="18" fill="#4FC3F7" opacity="0.85"/>
+<text x="107" y="71" text-anchor="middle" font-size="8" fill="#fff">2026-05-08</text>
+<circle cx="239" cy="79" r="18" fill="#4FC3F7" opacity="0.85"/>
+<text x="239" y="83" text-anchor="middle" font-size="8" fill="#fff">2026-05-09</text>
+<circle cx="349" cy="79" r="18" fill="#4FC3F7" opacity="0.85"/>
+<text x="349" y="83" text-anchor="middle" font-size="8" fill="#fff">2026-05-10</text>
+<circle cx="498" cy="78" r="18" fill="#4FC3F7" opacity="0.85"/>
+<text x="498" y="82" text-anchor="middle" font-size="8" fill="#fff">2026-05-11</text>
+<circle cx="602" cy="72" r="18" fill="#4FC3F7" opacity="0.85"/>
+<text x="602" y="76" text-anchor="middle" font-size="8" fill="#fff">2026-05-12</text>
+<circle cx="747" cy="67" r="18" fill="#4FC3F7" opacity="0.85"/>
+<text x="747" y="71" text-anchor="middle" font-size="8" fill="#fff">2026-05-13</text>
+<circle cx="89" cy="169" r="18" fill="#FFB800" opacity="0.85"/>
+<text x="89" y="173" text-anchor="middle" font-size="8" fill="#fff">INDEX</text>
+<circle cx="213" cy="163" r="18" fill="#4FC3F7" opacity="0.85"/>
+<text x="213" y="167" text-anchor="middle" font-size="8" fill="#fff">learnings-int..</text>
+<circle cx="356" cy="166" r="18" fill="#4FC3F7" opacity="0.85"/>
+<text x="356" y="170" text-anchor="middle" font-size="8" fill="#fff">semiconductor..</text>
+<circle cx="496" cy="156" r="18" fill="#999" opacity="0.85"/>
+<text x="496" y="160" text-anchor="middle" font-size="8" fill="#fff">macro-monitor..</text>
+<circle cx="625" cy="155" r="18" fill="#FF4444" opacity="0.85"/>
+<text x="625" y="159" text-anchor="middle" font-size="8" fill="#fff">2026-05-09-me..</text>
+<circle cx="746" cy="166" r="18" fill="#FF4444" opacity="0.85"/>
+<text x="746" y="170" text-anchor="middle" font-size="8" fill="#fff">2026-05-11-co..</text>
+<circle cx="100" cy="240" r="18" fill="#FF4444" opacity="0.85"/>
+<text x="100" y="244" text-anchor="middle" font-size="8" fill="#fff">2026-05-11-tr..</text>
+<circle cx="214" cy="254" r="18" fill="#FFB800" opacity="0.85"/>
+<text x="214" y="258" text-anchor="middle" font-size="8" fill="#fff">api-reliability</text>
+<circle cx="369" cy="249" r="18" fill="#FFB800" opacity="0.85"/>
+<text x="369" y="253" text-anchor="middle" font-size="8" fill="#fff">memory-manage..</text>
+<circle cx="473" cy="253" r="18" fill="#FFB800" opacity="0.85"/>
+<text x="473" y="257" text-anchor="middle" font-size="8" fill="#fff">memory-system</text>
+<circle cx="621" cy="241" r="18" fill="#FFB800" opacity="0.85"/>
+<text x="621" y="245" text-anchor="middle" font-size="8" fill="#fff">qmd-integration</text>
+<circle cx="757" cy="257" r="18" fill="#FFB800" opacity="0.85"/>
+<text x="757" y="261" text-anchor="middle" font-size="8" fill="#fff">silver-world-..</text>
+<circle cx="95" cy="335" r="18" fill="#FFB800" opacity="0.85"/>
+<text x="95" y="339" text-anchor="middle" font-size="8" fill="#fff">trading-syste..</text>
+<circle cx="234" cy="334" r="18" fill="#FFB800" opacity="0.85"/>
+<text x="234" y="338" text-anchor="middle" font-size="8" fill="#fff">trading-syste..</text>
+<circle cx="367" cy="337" r="18" fill="#E040FB" opacity="0.85"/>
+<text x="367" y="341" text-anchor="middle" font-size="8" fill="#fff">jordan-belfor..</text>
+<circle cx="476" cy="346" r="18" fill="#E040FB" opacity="0.85"/>
+<text x="476" y="350" text-anchor="middle" font-size="8" fill="#fff">user-profile</text>
+<circle cx="616" cy="346" r="18" fill="#FF9100" opacity="0.85"/>
+<text x="616" y="350" text-anchor="middle" font-size="8" fill="#fff">instructions-..</text>
+<circle cx="751" cy="341" r="18" fill="#FF9100" opacity="0.85"/>
+<text x="751" y="345" text-anchor="middle" font-size="8" fill="#fff">user-preferen..</text>
+<circle cx="93" cy="433" r="18" fill="#00E676" opacity="0.85"/>
+<text x="93" y="437" text-anchor="middle" font-size="8" fill="#fff">financial-ale..</text>
+<circle cx="226" cy="436" r="18" fill="#00E676" opacity="0.85"/>
+<text x="226" y="440" text-anchor="middle" font-size="8" fill="#fff">semiconductor..</text>
+<circle cx="349" cy="439" r="18" fill="#7C4DFF" opacity="0.85"/>
+<text x="349" y="443" text-anchor="middle" font-size="8" fill="#fff">2026-05-10</text>
+<circle cx="498" cy="438" r="18" fill="#7C4DFF" opacity="0.85"/>
+<text x="498" y="442" text-anchor="middle" font-size="8" fill="#fff">2026-05-11</text>
+<circle cx="602" cy="432" r="18" fill="#7C4DFF" opacity="0.85"/>
+<text x="602" y="436" text-anchor="middle" font-size="8" fill="#fff">2026-05-12</text>
+</svg>
+</div></div>
+<div class="section" id="api">
+<div class="section-header" onclick="toggleSection('api')"><h2>📡 API 透明度 API Transparency</h2><span class="toggle-icon">▼</span></div>
+<div class="section-body">
+<table class="api-table"><thead><tr><th>API</th><th>用途 Purpose</th><th>状态 Status</th><th>用途说明 Note</th></tr></thead><tbody>
+<tr><td>FRED</td><td>宏观数据</td><td>✅ Active</td><td>国债收益率/CPI/ISM</td></tr>
+<tr><td>Alpha Vantage</td><td>基本面</td><td>✅ Active</td><td>PE/ROE/EPS/Overview</td></tr>
+<tr><td>Twelve Data</td><td>技术指标</td><td>✅ Active</td><td>RSI/MACD/SMA/实时报价</td></tr>
+<tr><td>Finnhub</td><td>行情+新闻</td><td>✅ Active</td><td>实时价格/财报/评级/新闻</td></tr>
+<tr><td>Tavily</td><td>AI搜索</td><td>✅ Active</td><td>综合研究/事实核查</td></tr>
+<tr><td>News API</td><td>新闻监控</td><td>✅ Active</td><td>半导体/AI行业动态</td></tr>
+<tr><td>GitHub API</td><td>报告推送</td><td>✅ Active</td><td>HTML报告→GitHub Pages</td></tr>
+<tr><td>FMP</td><td>基本面(旧)</td><td>❌ 废弃</td><td>2025-08起不再支持</td></tr>
+<tr><td>OpenWeatherMap</td><td>天气</td><td>✅ Active</td><td>城市天气预报</td></tr>
+</tbody></table></div></div>
+<div class="footer">🦞 Clawd Memory Dashboard | 2026-05-13 | Powered by 🦞 energy<br><a href="https://sofun111.github.io/Claw_Analysis_Report/" style="color:var(--accent)">GitHub Pages</a></div>
+<script>
+
+function toggleSection(id) {
+    const section = document.getElementById(id);
+    section.classList.toggle('collapsed');
+}
+function filterLessons(tag) {
+    document.querySelectorAll('.tag-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tag === tag);
+    });
+    document.querySelectorAll('.lesson-card').forEach(card => {
+        const cardTags = JSON.parse(card.dataset.tags);
+        if (tag === 'all' || cardTags.includes(tag)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+document.querySelectorAll('#lessons .tag-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => filterLessons(btn.dataset.tag));
+});
+if (window.innerWidth < 600) {
+    ['events', 'health', 'graph'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('collapsed');
+    });
+}
+
+</script>
+</body>
+</html>
