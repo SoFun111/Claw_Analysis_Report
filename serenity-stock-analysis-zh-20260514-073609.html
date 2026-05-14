@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Serenity 股票组合分析报告 - 469条推文全量分析</title>
+    <style>
+        :root { --primary: #667eea; --secondary: #764ba2; --success: #4ecdc4; --warning: #ffe66d; --danger: #ff6b6b; --text: #2d3748; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: var(--text); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.15); border-radius: 16px; overflow: hidden; }
+        .header { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 40px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header .emoji { font-size: 60px; margin-bottom: 15px; }
+        .header .subtitle { font-size: 16px; opacity: 0.9; }
+        .content { padding: 30px; }
+        .section { margin-bottom: 35px; }
+        .section-title { font-size: 22px; color: var(--secondary); border-bottom: 3px solid var(--success); padding-bottom: 12px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { background: var(--primary); color: white; padding: 14px 12px; text-align: left; font-weight: 600; }
+        td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover { background: #f7fafc; }
+        .tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; margin-right: 5px; }
+        .tag-red { background: var(--danger); color: white; }
+        .tag-yellow { background: var(--warning); color: #1a1a2e; }
+        .tag-green { background: var(--success); color: white; }
+        .tag-gray { background: #a0aec0; color: white; }
+        .positive { color: var(--success); font-weight: 700; }
+        .negative { color: var(--danger); font-weight: 700; }
+        .highlight { background: rgba(102,126,234,0.1); padding: 20px; border-radius: 12px; border-left: 4px solid var(--success); margin: 20px 0; }
+        .warning-box { background: rgba(255,107,107,0.1); padding: 20px; border-radius: 12px; border-left: 4px solid var(--danger); margin: 20px 0; }
+        .success-box { background: rgba(78,205,196,0.1); padding: 20px; border-radius: 12px; border-left: 4px solid var(--success); margin: 20px 0; }
+        .footer { text-align: center; padding: 25px; background: #f7fafc; color: #718096; font-size: 13px; border-top: 2px solid #e2e8f0; }
+        .data-source { background: #edf2f7; padding: 12px 20px; border-radius: 8px; margin: 20px 0; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="emoji">🦞</div>
+            <h1>@Serenity 股票组合分析报告</h1>
+            <div class="subtitle">基于 Folo RSS 469条推文全量分析 | 2026-05-14</div>
+        </div>
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">📊 数据来源</h2>
+                <div class="data-source">
+                    <strong>数据来源：</strong>
+                    <span class="tag tag-gray">Folo RSS 订阅</span>
+                    <span class="tag tag-gray">TwelveData API</span>
+                    <span class="tag tag-gray">Finnhub API</span>
+                    <span class="tag tag-gray">Tavily AI</span>
+                </div>
+                <table>
+                    <tr><th>数据源</th><th>数量</th><th>时间范围</th><th>发现股票</th></tr>
+                    <tr><td>Folo RSS订阅</td><td align="center">469条推文</td><td align="center">4/30 - 5/14 (14天)</td><td align="center">28+ 个股票代码</td></tr>
+                    <tr><td>TwelveData API</td><td align="center">14只股票</td><td align="center">实时价格 + RSI</td><td align="center">价格 + 技术指标</td></tr>
+                    <tr><td>Finnhub API</td><td align="center">6只股票</td><td align="center">公司概况 + 市值</td><td align="center">补充数据</td></tr>
+                </table>
+            </div>
+            <div class="section">
+                <h2 class="section-title">📋 执行摘要</h2>
+                <div class="highlight">
+                    <p><strong>分析范围：</strong>成功读取 <strong>469条推文</strong>，通过 Folo RSS 获取 @Serenity 自4月30日至5月14日的全部发帖内容。</p>
+                    <p><strong>核心发现：</strong>Serenity 的 <span class="tag tag-red">高信念持仓</span> 聚焦于 <strong>CPO/光子供应链瓶颈</strong> 赛道。核心标的包括 TSEM、SIVE、AAOI、LITE，以及新发现的台湾股票 FOCI/Shunsin/Nextronics。</p>
+                    <p><strong>重要修正：</strong>相比之前通过Tavily搜索（仅发现15只），完整读取469条推文后新增发现 <strong>6只重要标的</strong>：FOCI(3363)、Shunsin(6451)、Nextronics(8147)、Harmonic Drive(6324)、HPS.A、NBIS。</p>
+                </div>
+            </div>
+            <div class="section">
+                <h2 class="section-title">🔴 高信念持仓 (HIGH CONVICTION)</h2>
+                <table>
+                    <tr><th>代码</th><th>名称</th><th>价格</th><th>涨跌幅</th><th>RSI</th><th>提及</th><th>状态</th><th>建议</th></tr>
+                    <tr><td><strong>$TSEM</strong></td><td>Tower Semiconductor</td><td>$270.77</td><td class="positive">+22.6%</td><td class="tag tag-yellow">58.3</td><td align="center">6次</td><td>$250+ ATH</td><td><span class="tag tag-yellow">⚠️ 等回调</span></td></tr>
+                    <tr><td><strong>$SIVEF</strong></td><td>Sivers Semiconductors</td><td>$5.86</td><td class="positive">+21.6%</td><td class="tag tag-yellow">67.2</td><td align="center">6次</td><td>+31.3% 单日</td><td><span class="tag tag-green">✅ 建仓首选</span></td></tr>
+                    <tr><td><strong>$AAOI</strong></td><td>Applied Optoelectronics</td><td>$223.10</td><td class="positive">+18.5%</td><td class="tag tag-yellow">69.0</td><td align="center">4次</td><td>6-7x 已涨</td><td><span class="tag tag-red">❌ 等回调</span></td></tr>
+                    <tr><td><strong>$LITE</strong></td><td>Lumentum Holdings</td><td>$1,030.37</td><td class="positive">+3.8%</td><td class="tag tag-green">61.4</td><td align="center">4次</td><td>$3B→$80B</td><td><span class="tag tag-green">✅ 小仓试探</span></td></tr>
+                    <tr><td><strong>FOCI (3363)</strong></td><td>台湾光纤组件</td><td>—</td><td>—</td><td>—</td><td align="center">4次</td><td>$3.35B MC</td><td><span class="tag tag-green">✅ 建仓首选</span></td></tr>
+                    <tr><td><strong>Shunsin (6451)</strong></td><td>鲜芯科技</td><td>—</td><td>—</td><td>—</td><td align="center">4次</td><td>$1.65B MC</td><td><span class="tag tag-green">✅ 建仓首选</span></td></tr>
+                    <tr><td><strong>Nextronics (8147)</strong></td><td>台湾连接器</td><td>—</td><td>—</td><td>—</td><td align="center">4次</td><td>NVDA供应商</td><td><span class="tag tag-green">✅ 建仓首选</span></td></tr>
+                </table>
+            </div>
+            <div class="section">
+                <h2 class="section-title">⚡ 新兴主题 (近期新推)</h2>
+                <div class="warning-box"><p><strong>⚠️ 以下是之前漏掉的重要标的：</strong></p></div>
+                <table>
+                    <tr><th>代码</th><th>名称</th><th>价格</th><th>涨跌幅</th><th>RSI</th><th>建议</th></tr>
+                    <tr><td><strong>$HPS.A</strong></td><td>Hammerpoint Steel</td><td>$14.63</td><td>0%</td><td class="tag tag-green">49.5</td><td><span class="tag tag-green">✅ 建仓首选</span></td></tr>
+                    <tr><td><strong>$NBIS</strong></td><td>Nebius</td><td>$207.27</td><td class="positive">+15.7%</td><td>—</td><td><span class="tag tag-yellow">⚠️ 已高</span></td></tr>
+                    <tr><td><strong>Harmonic (6324)</strong></td><td>日本谐波减速器</td><td>—</td><td>—</td><td>—</td><td><span class="tag tag-green">✅ 建仓首选</span></td></tr>
+                </table>
+            </div>
+            <div class="section">
+                <h2 class="section-title">🤖 人形机器人组合</h2>
+                <table>
+                    <tr><th>代码</th><th>名称</th><th>价格</th><th>涨跌幅</th><th>RSI</th></tr>
+                    <tr><td><strong>$OUST</strong></td><td>Ouster</td><td>$34.17</td><td class="positive">+26.1%</td><td class="tag tag-red">76.4</td></tr>
+                    <tr><td><strong>$AMBA</strong></td><td>Ambarella</td><td>$82.10</td><td class="positive">+5.0%</td><td>—</td></tr>
+                    <tr><td><strong>$SYM</strong></td><td>Symbotic</td><td>—</td><td>—</td><td>—</td></tr>
+                </table>
+            </div>
+            <div class="section">
+                <h2 class="section-title">🎯 建仓建议</h2>
+                <h3 style="color:#4ecdc4;margin:15px 0;">🟢 现在可以建仓</h3>
+                <div class="success-box">
+                    <table>
+                        <tr><th>股票</th><th>理由</th><th>入场区间</th><th>止损</th><th>仓位</th></tr>
+                        <tr><td><strong>$LITE</strong></td><td>RSI健康，激光瓶颈</td><td>$950-1050</td><td>$900</td><td>3-5%</td></tr>
+                        <tr><td><strong>$AVGO</strong></td><td>RSI中性</td><td>$400-420</td><td>$380</td><td>5-8%</td></tr>
+                        <tr><td><strong>$SIVEF</strong></td><td>MSCI催化剂</td><td>$5.50-6.20</td><td>$4.80</td><td>5-10%</td></tr>
+                    </table>
+                </div>
+                <h3 style="color:#ffe66d;margin:15px 0;">🟡 等待回调</h3>
+                <div class="warning-box">
+                    <table>
+                        <tr><th>股票</th><th>RSI</th><th>问题</th><th>等待条件</th></tr>
+                        <tr><td><strong>$AAOI</strong></td><td>69.0</td><td>接近超买</td><td>RSI<60</td></tr>
+                        <tr><td><strong>$TSEM</strong></td><td>—</td><td>+22.6%暴涨</td><td>$230-250</td></tr>
+                        <tr><td><strong>$NVDA</strong></td><td>72.1</td><td>超买区</td><td>RSI<65</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="section">
+                <h2 class="section-title">🛡️ 风控建议</h2>
+                <div class="warning-box">
+                    <ul>
+                        <li>单一标的：<strong>不超过8%</strong></li>
+                        <li>CPO主题：<strong>不超过30-40%</strong></li>
+                        <li>硬性止损：<strong>-15%</strong></li>
+                        <li>分批止盈：<strong>+50%/+100%</strong></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="section">
+                <h2 class="section-title">📊 API 数据来源</h2>
+                <table>
+                    <tr><th>API</th><th>用途</th><th>获取数据</th></tr>
+                    <tr><td>Folo CLI</td><td>RSS订阅</td><td>469条推文</td></tr>
+                    <tr><td>TwelveData</td><td>实时报价+RSI</td><td>价格、RSI(14)</td></tr>
+                    <tr><td>Finnhub</td><td>公司概况</td><td>市值、行业</td></tr>
+                </table>
+            </div>
+        </div>
+        <div class="footer">
+            <p style="font-size:16px;margin-bottom:10px;">🦞 报告生成时间: 2026-05-14 15:20 北京时间</p>
+            <p>数据来源: Folo RSS + TwelveData + Finnhub + Tavily AI</p>
+            <p style="margin-top:15px;font-weight:600;">⚠️ 本报告仅供参考，不构成投资建议。投资有风险，入市需谨慎。</p>
+        </div>
+    </div>
+</body>
+</html>
